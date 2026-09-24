@@ -1,0 +1,2183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MedIntel — AI Medical Assistant</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   TOKENS
+   ============================================================ */
+:root{
+  --brand-1:#0d9488;      /* teal */
+  --brand-2:#0ea5e9;      /* sky  */
+  --brand-3:#6366f1;      /* indigo */
+  --navy:#0b1729;
+  --navy-2:#0f2138;
+  --ink:#0f1e35;
+  --ink-2:#1e2f4d;
+  --muted:#64748b;
+  --muted-2:#94a3b8;
+  --line:#e5ecf5;
+  --line-2:#eef3fa;
+  --surface:#ffffff;
+  --bg:#f6f9fd;
+  --bg-2:#eef5fb;
+  --success:#10b981;
+  --warning:#f59e0b;
+  --danger:#ef4444;
+  --purple:#8b5cf6;
+  --radius:18px;
+  --radius-sm:12px;
+  --radius-lg:26px;
+  --shadow-sm:0 2px 6px -2px rgba(15,35,70,.08);
+  --shadow:0 14px 34px -18px rgba(13,60,120,.28);
+  --shadow-lg:0 28px 60px -28px rgba(13,60,120,.4);
+  --glow-teal:0 0 0 4px rgba(13,148,136,.14);
+  --glow-sky:0 0 0 4px rgba(14,165,233,.14);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+html,body{height:100%}
+body{
+  font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;
+  background:var(--bg); color:var(--ink); line-height:1.6;
+  display:flex; flex-direction:column; min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(1200px 600px at 90% -10%, rgba(14,165,233,.07), transparent 60%),
+    radial-gradient(900px 500px at -10% 20%, rgba(13,148,136,.07), transparent 60%);
+  background-attachment:fixed;
+}
+a{color:var(--brand-1); text-decoration:none; transition:.18s ease}
+a:hover{color:var(--brand-2)}
+button{font-family:inherit; cursor:pointer}
+::selection{background:var(--brand-1); color:#fff}
+
+/* custom scrollbar */
+::-webkit-scrollbar{width:10px; height:10px}
+::-webkit-scrollbar-thumb{background:#c8d6e8; border-radius:8px; border:3px solid transparent; background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background:#9fb3cb; background-clip:content-box}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+.navbar{
+  background:rgba(255,255,255,.78);
+  backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--line-2);
+  position:sticky; top:0; z-index:100;
+}
+.nav-container{
+  max-width:1280px; margin:0 auto;
+  display:flex; align-items:center; gap:22px;
+  padding:14px 26px;
+}
+.nav-logo{
+  display:inline-flex; align-items:center; gap:11px;
+  font-weight:800; font-size:1.15rem; color:var(--ink);
+  letter-spacing:-.02em;
+}
+.nav-logo-mark{
+  width:40px; height:40px; border-radius:13px;
+  background:linear-gradient(135deg,var(--brand-1),var(--brand-2));
+  display:grid; place-items:center; color:#fff; font-size:1.1rem;
+  box-shadow:0 10px 22px -10px rgba(13,148,136,.6), inset 0 0 0 1px rgba(255,255,255,.2);
+  position:relative;
+}
+.nav-logo-mark::after{
+  content:''; position:absolute; inset:6px; border-radius:9px;
+  background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.4), transparent 60%);
+  pointer-events:none;
+}
+.nav-logo span{background:linear-gradient(90deg,var(--navy),var(--brand-1)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent}
+
+.nav-menu{display:flex; align-items:center; gap:14px; flex:1; justify-content:flex-end}
+.nav-links{
+  display:flex; list-style:none; gap:6px; align-items:center;
+  background:rgba(241,246,252,.75);
+  border:1px solid var(--line-2);
+  padding:5px; border-radius:999px;
+}
+.nav-link{
+  display:inline-flex; align-items:center; gap:7px;
+  font-size:.86rem; font-weight:600; color:var(--ink-2);
+  padding:8px 15px; border-radius:999px;
+  transition:.18s ease; white-space:nowrap;
+}
+.nav-link i{font-size:.78rem; opacity:.75}
+.nav-link:hover{background:#fff; color:var(--brand-1); box-shadow:var(--shadow-sm)}
+.nav-link.active{
+  background:linear-gradient(135deg,var(--navy),var(--navy-2));
+  color:#fff; box-shadow:0 8px 18px -8px rgba(11,23,41,.7);
+}
+.nav-link.active i{opacity:1; color:#7dd3fc}
+
+.nav-auth{display:flex; align-items:center; gap:10px}
+.user-badge{
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:.8rem; font-weight:700;
+  padding:8px 14px; border-radius:999px;
+  background:linear-gradient(135deg,#e6faf7,#e0f2fe);
+  color:#0f766e; border:1px solid #b6eae2;
+}
+.user-badge.admin{
+  background:linear-gradient(135deg,#fef3c7,#fde68a);
+  color:#854d0e; border-color:#fcd34d;
+}
+.user-badge i{font-size:.8rem}
+
+.hamburger{
+  display:none; background:none; border:none;
+  flex-direction:column; gap:5px; padding:8px; border-radius:10px;
+}
+.hamburger span{width:22px; height:2px; background:var(--ink); border-radius:2px; transition:.2s}
+.hamburger:hover{background:var(--line-2)}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:11px 22px; border-radius:12px; border:none;
+  font-size:.9rem; font-weight:700; letter-spacing:.01em;
+  transition:.2s ease; text-decoration:none; white-space:nowrap;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--brand-1),var(--brand-2));
+  color:#fff;
+  box-shadow:0 12px 22px -12px rgba(13,148,136,.7), inset 0 0 0 1px rgba(255,255,255,.15);
+}
+.btn-primary:hover{transform:translateY(-2px); color:#fff; box-shadow:0 18px 30px -12px rgba(13,148,136,.85)}
+.btn-outline{
+  background:#fff; color:var(--brand-1);
+  border:1.5px solid #d5e5ea;
+  box-shadow:var(--shadow-sm);
+}
+.btn-outline:hover{background:#f0fdfa; color:var(--brand-1); border-color:#a7e8dc; transform:translateY(-1px)}
+.btn-danger{
+  background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff;
+  box-shadow:0 12px 22px -12px rgba(239,68,68,.7);
+}
+.btn-danger:hover{transform:translateY(-2px); color:#fff}
+.btn-ghost{background:transparent; color:var(--ink-2); border:1px solid transparent}
+.btn-ghost:hover{background:var(--line-2); color:var(--ink)}
+.btn-sm{padding:8px 14px; font-size:.8rem; border-radius:10px}
+.btn-xs{padding:5px 10px; font-size:.72rem; border-radius:8px}
+.btn-lg{padding:15px 30px; font-size:.98rem; border-radius:14px}
+.btn-block{width:100%}
+.btn:disabled{background:#b9c8de; cursor:not-allowed; transform:none; opacity:.85; box-shadow:none}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+main{flex:1; padding:34px 0 60px}
+.container{max-width:1280px; margin:0 auto; padding:0 26px}
+.page-header{text-align:center; padding:22px 20px 40px}
+.page-header h1{
+  font-size:clamp(1.7rem,3.4vw,2.4rem); font-weight:800;
+  letter-spacing:-.03em; margin-bottom:12px; color:var(--ink);
+}
+.page-header p{color:var(--muted); font-size:1.02rem; max-width:640px; margin:0 auto}
+
+.content-section{max-width:1180px; margin:0 auto; padding:0 26px}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{
+  position:relative; overflow:hidden;
+  padding:76px 26px 96px;
+  background:linear-gradient(155deg,#0b1729 0%,#0f2138 45%,#0f3a52 100%);
+  color:#e2ebf5;
+  border-radius:0 0 40px 40px;
+  margin-bottom:48px;
+}
+.hero::before, .hero::after{
+  content:''; position:absolute; border-radius:50%; pointer-events:none;
+}
+.hero::before{
+  width:560px; height:560px; right:-180px; top:-200px;
+  background:radial-gradient(circle, rgba(14,165,233,.35), transparent 65%);
+  filter:blur(20px);
+}
+.hero::after{
+  width:480px; height:480px; left:-140px; bottom:-220px;
+  background:radial-gradient(circle, rgba(13,148,136,.4), transparent 65%);
+  filter:blur(20px);
+}
+.hero-grid{
+  max-width:1180px; margin:0 auto; position:relative; z-index:1;
+  display:grid; grid-template-columns:1.15fr 1fr; gap:50px; align-items:center;
+}
+.hero-content{max-width:640px}
+.hero-eyebrow{
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:.76rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+  color:#7dd3fc;
+  background:rgba(125,211,252,.1);
+  border:1px solid rgba(125,211,252,.25);
+  padding:7px 14px; border-radius:999px; margin-bottom:22px;
+}
+.hero-eyebrow i{font-size:.85rem}
+.hero h1{
+  font-size:clamp(2.1rem,4.6vw,3.4rem); font-weight:800;
+  line-height:1.08; letter-spacing:-.035em;
+  margin-bottom:22px; color:#fff;
+}
+.hero h1 .accent{
+  background:linear-gradient(90deg,#5eead4,#7dd3fc,#a5b4fc);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.hero p{font-size:1.08rem; color:#b4c4d8; margin-bottom:32px; max-width:540px}
+.hero-buttons{display:flex; gap:14px; flex-wrap:wrap}
+.hero-buttons .btn-outline{
+  background:rgba(255,255,255,.06); color:#e2ebf5;
+  border:1.5px solid rgba(255,255,255,.22);
+}
+.hero-buttons .btn-outline:hover{background:rgba(255,255,255,.14); color:#fff}
+
+.hero-visual{
+  position:relative; display:grid; place-items:center;
+  min-height:360px;
+}
+.pulse-ring{
+  position:absolute; inset:0; margin:auto;
+  width:340px; height:340px; border-radius:50%;
+  background:radial-gradient(circle, rgba(13,148,136,.4), transparent 65%);
+  animation:pulse-soft 4s ease-in-out infinite;
+}
+@keyframes pulse-soft{0%,100%{transform:scale(1); opacity:.7}50%{transform:scale(1.08); opacity:1}}
+.hero-icon{
+  position:relative; z-index:1;
+  width:200px; height:200px; border-radius:50%;
+  background:linear-gradient(135deg,rgba(94,234,212,.15),rgba(125,211,252,.15));
+  border:1px solid rgba(125,211,252,.3);
+  display:grid; place-items:center;
+  font-size:5.5rem; color:#5eead4;
+  box-shadow:
+    0 0 0 20px rgba(125,211,252,.06),
+    0 0 0 40px rgba(125,211,252,.03),
+    0 30px 60px -30px rgba(94,234,212,.6);
+  animation:float 6s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+.hero-stats{
+  position:absolute; bottom:-32px; left:50%; transform:translateX(-50%);
+  display:flex; gap:14px; z-index:2;
+  background:rgba(15,33,56,.85);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(125,211,252,.18);
+  padding:14px 22px; border-radius:20px;
+  box-shadow:0 22px 42px -22px rgba(0,0,0,.6);
+}
+.hero-stat{text-align:center; padding:0 18px}
+.hero-stat + .hero-stat{border-left:1px solid rgba(125,211,252,.15)}
+.hero-stat strong{display:block; font-size:1.15rem; font-weight:800; color:#fff; letter-spacing:-.02em}
+.hero-stat span{font-size:.72rem; color:#8ba3bd; text-transform:uppercase; letter-spacing:.1em}
+
+@media (max-width:900px){
+  .hero-grid{grid-template-columns:1fr; gap:30px}
+  .hero-visual{min-height:260px}
+  .hero-icon{width:160px; height:160px; font-size:4.3rem}
+  .pulse-ring{width:280px; height:280px}
+  .hero-stats{position:static; transform:none; margin-top:30px; justify-content:center; flex-wrap:wrap}
+}
+
+/* ============================================================
+   FEATURES
+   ============================================================ */
+.features{max-width:1180px; margin:0 auto; padding:0 26px 50px}
+.features-header{text-align:center; margin-bottom:44px}
+.features-header span{
+  font-size:.76rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--brand-1);
+}
+.features-header h2{
+  font-size:clamp(1.5rem,2.6vw,2.1rem); font-weight:800;
+  letter-spacing:-.03em; margin-top:10px; color:var(--ink);
+}
+.features-grid{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:22px;
+}
+.feature-card{
+  background:#fff; border:1px solid var(--line);
+  border-radius:var(--radius); padding:30px 26px;
+  transition:.28s cubic-bezier(.2,.7,.3,1); position:relative; overflow:hidden;
+}
+.feature-card::before{
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background:linear-gradient(90deg,var(--brand-1),var(--brand-2));
+  transform:scaleX(0); transform-origin:left; transition:.35s ease;
+}
+.feature-card:hover{
+  transform:translateY(-6px);
+  box-shadow:var(--shadow); border-color:#d6e8ee;
+}
+.feature-card:hover::before{transform:scaleX(1)}
+.feature-icon{
+  width:56px; height:56px; border-radius:16px;
+  display:grid; place-items:center; margin-bottom:18px;
+  font-size:1.35rem; color:#fff;
+  background:linear-gradient(135deg,var(--brand-1),var(--brand-2));
+  box-shadow:0 12px 22px -12px rgba(13,148,136,.7);
+}
+.feature-icon.purple{background:linear-gradient(135deg,var(--purple),#a78bfa); box-shadow:0 12px 22px -12px rgba(139,92,246,.7)}
+.feature-icon.amber{background:linear-gradient(135deg,#f59e0b,#fbbf24); box-shadow:0 12px 22px -12px rgba(245,158,11,.7)}
+.feature-icon.rose{background:linear-gradient(135deg,#f43f5e,#fb7185); box-shadow:0 12px 22px -12px rgba(244,63,94,.7)}
+.feature-card h3{font-size:1.02rem; font-weight:700; margin-bottom:8px; color:var(--ink); letter-spacing:-.01em}
+.feature-card p{color:var(--muted); font-size:.88rem; line-height:1.65}
+
+/* ============================================================
+   DISCLAIMER
+   ============================================================ */
+.disclaimer-banner{max-width:1180px; margin:0 auto 56px; padding:0 26px}
+.disclaimer-content{
+  background:linear-gradient(135deg,#fffbeb,#fef3c7);
+  border:1px solid #fde68a; border-radius:var(--radius);
+  padding:24px 26px; display:flex; gap:20px; align-items:flex-start;
+  box-shadow:0 14px 30px -20px rgba(245,158,11,.5);
+}
+.disclaimer-content i{
+  color:#b45309; font-size:1.5rem; flex-shrink:0;
+  width:48px; height:48px; border-radius:14px;
+  background:rgba(255,255,255,.7); display:grid; place-items:center;
+  box-shadow:0 6px 14px -6px rgba(180,83,9,.35);
+}
+.disclaimer-content h3{font-size:.98rem; color:#78350f; margin-bottom:5px; letter-spacing:-.01em}
+.disclaimer-content p{font-size:.88rem; color:#7c5410}
+
+/* ============================================================
+   ABOUT
+   ============================================================ */
+.about-grid{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:24px;
+}
+.about-card{
+  background:#fff; border:1px solid var(--line);
+  border-radius:var(--radius); padding:32px 28px;
+  transition:.28s cubic-bezier(.2,.7,.3,1); position:relative;
+}
+.about-card:hover{
+  transform:translateY(-5px);
+  box-shadow:var(--shadow); border-color:#d6e8ee;
+}
+.about-card i{
+  font-size:1.35rem; color:#fff;
+  width:52px; height:52px; border-radius:15px;
+  display:grid; place-items:center; margin-bottom:18px;
+  background:linear-gradient(135deg,var(--brand-1),var(--brand-2));
+  box-shadow:0 12px 22px -12px rgba(13,148,136,.7);
+}
+.about-card h3{font-size:1.02rem; margin-bottom:8px; font-weight:700; letter-spacing:-.01em}
+.about-card p{color:var(--muted); font-size:.88rem; line-height:1.65}
+
+/* ============================================================
+   CONTACT
+   ============================================================ */
+.contact-grid{display:grid; grid-template-columns:1fr 1.2fr; gap:26px}
+@media(max-width:820px){.contact-grid{grid-template-columns:1fr}}
+.contact-info{
+  background:#fff; border:1px solid var(--line);
+  border-radius:var(--radius); padding:34px 30px;
+  display:flex; flex-direction:column; gap:28px;
+}
+.contact-item{display:flex; gap:16px; align-items:flex-start}
+.contact-item i{
+  width:46px; height:46px; flex-shrink:0; border-radius:14px;
+  background:linear-gradient(135deg,#f0fdfa,#e0f2fe);
+  color:var(--brand-1);
+  display:grid; place-items:center; font-size:1.05rem;
+  border:1px solid #ccf0e9;
+}
+.contact-item h3{font-size:.95rem; margin-bottom:2px; font-weight:700}
+.contact-item p{color:var(--muted); font-size:.86rem}
+.contact-form-card{
+  background:#fff; border:1px solid var(--line);
+  border-radius:var(--radius); padding:34px 30px;
+  box-shadow:var(--shadow-sm);
+}
+.contact-form-card h3{font-size:1.12rem; margin-bottom:22px; font-weight:700; letter-spacing:-.01em}
+
+/* ============================================================
+   FORMS
+   ============================================================ */
+.form-group{margin-bottom:18px}
+.form-group label{
+  display:block; font-size:.8rem; font-weight:700;
+  color:var(--ink-2); margin-bottom:8px;
+  letter-spacing:.02em;
+}
+.form-group input,
+.form-group textarea,
+.form-group select{
+  width:100%; padding:13px 16px; border-radius:12px;
+  border:1.5px solid var(--line); background:#fafcfe;
+  font-size:.92rem; font-family:inherit; color:var(--ink);
+  transition:.2s ease; outline:none;
+}
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus{
+  border-color:var(--brand-1); background:#fff;
+  box-shadow:var(--glow-teal);
+}
+.form-group textarea{resize:vertical; min-height:110px}
+.form-group input::placeholder,
+.form-group textarea::placeholder{color:#9cacc2}
+
+/* ============================================================
+   AUTH
+   ============================================================ */
+.auth-page{
+  min-height:calc(100vh - 260px);
+  display:flex; align-items:center; justify-content:center;
+  padding:50px 22px;
+}
+.auth-card{
+  width:100%; max-width:460px; background:#fff;
+  border-radius:26px; padding:46px 40px;
+  box-shadow:var(--shadow-lg); border:1px solid var(--line-2);
+  position:relative; overflow:hidden;
+}
+.auth-card::before{
+  content:''; position:absolute; top:-80px; right:-80px;
+  width:200px; height:200px; border-radius:50%;
+  background:radial-gradient(circle, rgba(13,148,136,.12), transparent 70%);
+}
+.auth-card::after{
+  content:''; position:absolute; bottom:-80px; left:-80px;
+  width:200px; height:200px; border-radius:50%;
+  background:radial-gradient(circle, rgba(14,165,233,.12), transparent 70%);
+}
+.auth-header{text-align:center; margin-bottom:32px; position:relative}
+.auth-header i{
+  width:72px; height:72px; border-radius:20px;
+  background:linear-gradient(135deg,var(--brand-1),var(--brand-2));
+  color:#fff; display:grid; place-items:center;
+  font-size:1.7rem; margin:0 auto 18px;
+  box-shadow:0 18px 34px -16px rgba(13,148,136,.75), inset 0 0 0 1px rgba(255,255,255,.2);
+}
+.auth-header h2{font-size:1.45rem; font-weight:800; margin-bottom:6px; letter-spacing:-.02em}
+.auth-header p{color:var(--muted); font-size:.9rem}
+.auth-form{position:relative}
+.auth-footer{
+  text-align:center; margin-top:24px; padding-top:22px;
+  border-top:1px solid var(--line-2);
+  font-size:.87rem; color:var(--muted); position:relative;
+}
+.auth-footer p + p{margin-top:8px}
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+.dashboard-page{max-width:1280px; margin:0 auto; padding:0 26px}
+.dashboard-header{
+  position:relative; overflow:hidden;
+  background:linear-gradient(135deg,#0b1729 0%,#0f2138 55%,#0f3a52 100%);
+  color:#e2ebf5; border-radius:var(--radius-lg);
+  padding:34px 36px; margin-bottom:28px;
+}
+.dashboard-header::before{
+  content:''; position:absolute; right:-100px; top:-100px;
+  width:320px; height:320px; border-radius:50%;
+  background:radial-gradient(circle, rgba(94,234,212,.25), transparent 65%);
+}
+.dashboard-header h1{
+  font-size:1.7rem; font-weight:800; letter-spacing:-.025em;
+  margin-bottom:6px; color:#fff; position:relative;
+}
+.dashboard-header p{color:#b4c4d8; position:relative}
+.dashboard-header p strong{color:#5eead4}
+
+/* stats */
+.stats-row{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:20px; margin-bottom:28px;
+}
+.stat-card{
+  background:#fff; border:1px solid var(--line);
+  border-radius:var(--radius); padding:24px;
+  display:flex; align-items:center; gap:18px;
+  transition:.25s ease;
+}
+.stat-card:hover{transform:translateY(-3px); box-shadow:var(--shadow); border-color:#d6e8ee}
+.stat-icon{
+  width:56px; height:56px; border-radius:16px;
+  display:grid; place-items:center; font-size:1.3rem;
+  flex-shrink:0; color:#fff;
+}
+.stat-icon.blue{background:linear-gradient(135deg,#0ea5e9,#0284c7); box-shadow:0 12px 22px -12px rgba(2,132,199,.7)}
+.stat-icon.green{background:linear-gradient(135deg,#10b981,#059669); box-shadow:0 12px 22px -12px rgba(5,150,105,.7)}
+.stat-icon.purple{background:linear-gradient(135deg,#8b5cf6,#7c3aed); box-shadow:0 12px 22px -12px rgba(124,58,237,.7)}
+.stat-icon.amber{background:linear-gradient(135deg,#f59e0b,#d97706); box-shadow:0 12px 22px -12px rgba(217,119,6,.7)}
+.stat-info h3{font-size:1.5rem; font-weight:800; letter-spacing:-.03em; line-height:1.1}
+.stat-info p{font-size:.78rem; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; font-weight:600}
+
+/* quick action cards */
+.quick-actions{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:20px; margin-bottom:28px;
+}
+.action-card{
+  background:#fff; border:1px solid var(--line);
+  border-radius:var(--radius); padding:26px 24px;
+  text-decoration:none; color:var(--ink);
+  transition:.28s cubic-bezier(.2,.7,.3,1); position:relative; overflow:hidden;
+}
+.action-card::after{
+  content:'\f061'; font-family:'Font Awesome 6 Free'; font-weight:900;
+  position:absolute; bottom:22px; right:22px;
+  color:#cbd8e8; font-size:.9rem; transition:.28s;
+}
+.action-card:hover{
+  transform:translateY(-5px); box-shadow:var(--shadow);
+  border-color:#c9e8e2; color:var(--ink);
+}
+.action-card:hover::after{color:var(--brand-1); transform:translateX(4px)}
+.action-card i{
+  font-size:1.35rem; color:#fff;
+  width:50px; height:50px; border-radius:14px;
+  display:grid; place-items:center; margin-bottom:16px;
+  background:linear-gradient(135deg,var(--brand-1),var(--brand-2));
+  box-shadow:0 12px 22px -12px rgba(13,148,136,.7);
+}
+.action-card h3{font-size:.98rem; margin-bottom:5px; font-weight:700; letter-spacing:-.01em}
+.action-card p{font-size:.82rem; color:var(--muted); padding-right:22px}
+
+/* section card */
+.section-card{
+  background:#fff; border:1px solid var(--line);
+  border-radius:var(--radius); padding:26px 26px;
+  margin-bottom:24px;
+}
+.section-header{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:20px; gap:14px; flex-wrap:wrap;
+}
+.section-header h2{
+  font-size:1.02rem; font-weight:700; letter-spacing:-.01em;
+  display:inline-flex; align-items:center; gap:10px;
+}
+.section-header h2 i{color:var(--brand-1)}
+.section-actions{
+  display:flex; gap:10px; margin-bottom:24px;
+  flex-wrap:wrap; justify-content:flex-end;
+}
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+.table-responsive{overflow-x:auto; border-radius:var(--radius-sm)}
+.table-wrap{
+  background:#fff; border:1px solid var(--line);
+  border-radius:var(--radius); overflow:hidden;
+}
+table{width:100%; border-collapse:collapse}
+th,td{
+  text-align:left; padding:15px 18px;
+  border-bottom:1px solid var(--line-2); font-size:.86rem;
+}
+th{
+  background:#f5f9fd; font-weight:700; font-size:.72rem;
+  text-transform:uppercase; letter-spacing:.09em;
+  color:var(--muted); border-bottom:1px solid var(--line);
+}
+tr:last-child td{border-bottom:none}
+tbody tr{transition:.15s}
+tbody tr:hover td{background:#fafdff}
+.text-truncate{max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.role-badge{
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:.72rem; font-weight:700;
+  padding:5px 11px; border-radius:999px;
+  background:linear-gradient(135deg,#e0f2fe,#e6faf7);
+  color:#0369a1; text-transform:capitalize;
+  border:1px solid #bae6fd;
+}
+.role-badge.admin{
+  background:linear-gradient(135deg,#fef3c7,#fde68a);
+  color:#854d0e; border-color:#fcd34d;
+}
+
+/* ============================================================
+   HISTORY CARDS
+   ============================================================ */
+.history-list{display:flex; flex-direction:column; gap:18px}
+.history-card{
+  background:#fff; border:1px solid var(--line);
+  border-radius:var(--radius); padding:22px 24px;
+  transition:.25s ease;
+}
+.history-card:hover{border-color:#c9e8e2; box-shadow:var(--shadow)}
+.history-meta{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:14px; flex-wrap:wrap;
+  padding-bottom:14px; margin-bottom:16px;
+  border-bottom:1px dashed #dbe6f5; font-size:.8rem; color:var(--muted);
+}
+.history-meta-left{display:flex; gap:18px; flex-wrap:wrap; align-items:center}
+.history-user,.history-date{display:inline-flex; align-items:center; gap:7px; font-weight:600}
+.history-user i{color:var(--brand-1)}
+.history-date i{color:var(--brand-2)}
+.history-content{display:flex; flex-direction:column; gap:14px}
+.history-question,.history-answer{
+  padding:14px 18px; border-radius:14px; font-size:.88rem; line-height:1.65;
+}
+.history-question{background:linear-gradient(135deg,#f0f9ff,#f5fbff); border-left:3px solid var(--brand-2)}
+.history-answer{background:linear-gradient(135deg,#f0fdfa,#f4fefb); border-left:3px solid var(--brand-1)}
+.history-question strong,.history-answer strong{
+  display:block; margin-bottom:6px; font-size:.74rem;
+  text-transform:uppercase; letter-spacing:.08em;
+}
+.history-question strong{color:#0369a1}
+.history-answer strong{color:#0f766e}
+.history-question p,.history-answer p{margin:0; color:var(--ink); white-space:pre-wrap; font-size:.87rem}
+
+.empty-state{
+  background:#fff; border:1.5px dashed #d1dce9;
+  border-radius:var(--radius); padding:64px 30px;
+  text-align:center; color:var(--muted);
+}
+.empty-state i{
+  font-size:2.6rem; color:#cbd8e8; margin-bottom:18px;
+  display:block;
+}
+.empty-state h3{font-size:1.1rem; margin-bottom:8px; color:var(--ink); font-weight:700}
+.empty-state p{margin-bottom:22px; font-size:.9rem}
+
+/* ============================================================
+   CHAT
+   ============================================================ */
+.chat-page{
+  max-width:960px; margin:0 auto; padding:0 26px;
+  display:flex; flex-direction:column;
+  height:calc(100vh - 170px); min-height:560px;
+}
+.chat-container{
+  background:#fff; border:1px solid var(--line);
+  border-radius:var(--radius-lg); overflow:hidden;
+  flex:1; display:flex; flex-direction:column;
+  box-shadow:var(--shadow-lg);
+}
+.chat-header{
+  padding:18px 24px; border-bottom:1px solid var(--line-2);
+  display:flex; align-items:center; justify-content:space-between;
+  gap:14px;
+  background:linear-gradient(135deg,#0b1729 0%,#0f2138 60%,#0f3a52 100%);
+  color:#e2ebf5;
+}
+.chat-title{display:flex; align-items:center; gap:14px}
+.chat-title > i{
+  width:46px; height:46px; border-radius:14px;
+  background:linear-gradient(135deg,var(--brand-1),var(--brand-2));
+  color:#fff; display:grid; place-items:center;
+  font-size:1.1rem; flex-shrink:0;
+  box-shadow:0 12px 22px -12px rgba(13,148,136,.8);
+}
+.chat-title h2{font-size:1rem; font-weight:700; color:#fff; letter-spacing:-.01em}
+.model-tag{
+  font-size:.72rem; color:#8ba3bd;
+  display:inline-flex; align-items:center; gap:6px;
+  margin-top:2px;
+}
+.model-tag i{color:#5eead4; font-size:.72rem}
+.chat-actions{display:flex; gap:8px}
+.chat-actions .btn-outline{
+  background:rgba(255,255,255,.08); color:#e2ebf5;
+  border:1px solid rgba(255,255,255,.18);
+}
+.chat-actions .btn-outline:hover{background:rgba(255,255,255,.16); color:#fff; border-color:rgba(255,255,255,.3)}
+
+.messages-area{
+  flex:1; overflow-y:auto; padding:26px 26px 12px;
+  display:flex; flex-direction:column; gap:18px;
+  background:
+    radial-gradient(900px 400px at 90% -20%, rgba(14,165,233,.04), transparent 60%),
+    radial-gradient(700px 400px at -10% 90%, rgba(13,148,136,.04), transparent 60%);
+}
+
+.welcome-msg{
+  text-align:center; padding:30px 24px;
+  background:linear-gradient(135deg,#f6fdff,#f0fdfa);
+  border:1.5px dashed #bfe8e2; border-radius:18px;
+  margin-bottom:12px;
+}
+.welcome-icon{
+  width:64px; height:64px; margin:0 auto 16px;
+  border-radius:20px; display:grid; place-items:center;
+  background:linear-gradient(135deg,var(--brand-1),var(--brand-2));
+  color:#fff; font-size:1.6rem;
+  box-shadow:0 18px 34px -16px rgba(13,148,136,.75);
+}
+.welcome-msg h3{font-size:1.1rem; margin-bottom:8px; font-weight:700; letter-spacing:-.01em}
+.welcome-msg p{color:var(--muted); font-size:.88rem; margin-bottom:5px}
+.welcome-msg .small-text{font-size:.78rem; color:var(--muted-2)}
+.topic-suggestions{margin-top:22px}
+.topic-suggestions h4{
+  font-size:.72rem; color:var(--muted);
+  margin-bottom:12px; text-transform:uppercase; letter-spacing:.1em;
+  font-weight:700;
+}
+.topic-btns{display:flex; flex-wrap:wrap; gap:8px; justify-content:center}
+.topic-btn{
+  font-size:.8rem; font-weight:600;
+  padding:9px 16px; border-radius:999px;
+  border:1.5px solid #d5e9e6; background:#fff;
+  color:var(--brand-1); cursor:pointer;
+  transition:.2s ease;
+}
+.topic-btn:hover{
+  background:linear-gradient(135deg,#ecfdfa,#e0f2fe);
+  border-color:#a7e8dc; transform:translateY(-1px);
+  box-shadow:0 8px 16px -10px rgba(13,148,136,.5);
+}
+
+.msg{
+  max-width:82%; padding:14px 18px; border-radius:18px;
+  font-size:.92rem; line-height:1.65; word-wrap:break-word;
+  animation:rise .28s cubic-bezier(.2,.7,.3,1) both;
+}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.msg.user{
+  align-self:flex-end;
+  background:linear-gradient(135deg,var(--brand-1),var(--brand-2));
+  color:#fff; border-bottom-right-radius:5px;
+  box-shadow:0 14px 26px -14px rgba(13,148,136,.75);
+}
+.msg.bot{
+  align-self:flex-start; background:#fff;
+  border:1px solid var(--line);
+  border-bottom-left-radius:5px;
+  box-shadow:0 6px 20px -14px rgba(15,40,80,.25);
+}
+.msg.bot h3{
+  font-size:.96rem; color:#0f766e; margin:12px 0 6px;
+  font-weight:700; letter-spacing:-.01em;
+  display:inline-flex; align-items:center; gap:8px;
+}
+.msg.bot h3::before{
+  content:''; width:5px; height:5px; border-radius:50%;
+  background:var(--brand-1);
+}
+.msg.bot h3:first-child{margin-top:0}
+.msg.bot ul{padding-left:20px; margin:6px 0}
+.msg.bot li{margin:5px 0}
+.msg.bot strong{color:#0f766e}
+.msg.bot p{margin:6px 0}
+.msg .note{
+  margin-top:12px; padding-top:10px;
+  border-top:1px dashed #d5e1f2;
+  font-size:.78rem; color:var(--muted);
+  display:flex; gap:6px; align-items:flex-start;
+}
+.msg .note::before{content:'ⓘ'; color:var(--brand-1); font-weight:700}
+
+.typing-indicator{
+  display:none; align-items:center; gap:6px;
+  padding:6px 26px 14px; font-size:.8rem; color:var(--muted);
+}
+.typing-indicator.active{display:flex}
+.typing-indicator span:not(.typing-text){
+  width:8px; height:8px; border-radius:50%;
+  background:#93aacd; display:inline-block;
+  animation:bounce 1.3s infinite ease-in-out;
+}
+.typing-indicator span:nth-child(2){animation-delay:.16s}
+.typing-indicator span:nth-child(3){animation-delay:.32s}
+.typing-text{margin-left:6px; font-style:italic}
+@keyframes bounce{0%,80%,100%{transform:scale(.6);opacity:.5}40%{transform:scale(1);opacity:1}}
+
+.chat-input-area{
+  padding:16px 20px 20px; border-top:1px solid var(--line-2);
+  background:#fbfdff;
+}
+.input-wrapper{display:flex; gap:10px; align-items:flex-end}
+.input-wrapper textarea{
+  flex:1; padding:13px 18px; border-radius:14px;
+  border:1.5px solid var(--line); background:#fff;
+  font-size:.92rem; font-family:inherit; outline:none;
+  resize:none; max-height:140px; min-height:48px;
+  transition:.2s ease;
+}
+.input-wrapper textarea:focus{border-color:var(--brand-1); box-shadow:var(--glow-teal)}
+.send-btn{
+  width:48px; height:48px; border-radius:14px; border:none;
+  background:linear-gradient(135deg,var(--brand-1),var(--brand-2));
+  color:#fff; font-size:1rem;
+  transition:.2s ease; flex-shrink:0;
+  box-shadow:0 12px 22px -12px rgba(13,148,136,.8);
+}
+.send-btn:hover:not(:disabled){transform:translateY(-1px); filter:brightness(1.06)}
+.send-btn:disabled{background:#b9c8de; cursor:not-allowed; box-shadow:none}
+.input-disclaimer{
+  font-size:.74rem; color:var(--muted);
+  margin-top:10px; display:flex; align-items:center; gap:6px;
+}
+.input-disclaimer i{color:var(--warning)}
+
+/* ============================================================
+   FLASH / TOAST
+   ============================================================ */
+.flash-container{
+  position:fixed; top:78px; right:24px; z-index:200;
+  display:flex; flex-direction:column; gap:10px; max-width:380px;
+}
+.flash{
+  padding:14px 18px; border-radius:14px;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:14px; font-size:.86rem; font-weight:600;
+  box-shadow:0 20px 40px -18px rgba(15,35,70,.4);
+  animation:slideIn .35s cubic-bezier(.2,.7,.3,1) both;
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+}
+@keyframes slideIn{from{opacity:0;transform:translateX(36px)}to{opacity:1;transform:none}}
+.flash-success{background:linear-gradient(135deg,#ecfdf5,#d1fae5); color:#065f46; border:1px solid #a7f3d0}
+.flash-error{background:linear-gradient(135deg,#fef2f2,#fee2e2); color:#991b1b; border:1px solid #fecaca}
+.flash-info{background:linear-gradient(135deg,#eff6ff,#e0f2fe); color:#1e40af; border:1px solid #bfdbfe}
+.flash-close{
+  background:none; border:none; font-size:1.3rem;
+  color:inherit; cursor:pointer; line-height:1; opacity:.55;
+  transition:.18s;
+}
+.flash-close:hover{opacity:1}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer{
+  background:linear-gradient(180deg,#0b1729 0%,#0a1322 100%);
+  color:#8ba3bd; padding:52px 26px 24px; margin-top:auto;
+  position:relative; overflow:hidden;
+}
+.footer::before{
+  content:''; position:absolute; top:-100px; right:-100px;
+  width:400px; height:400px; border-radius:50%;
+  background:radial-gradient(circle, rgba(13,148,136,.18), transparent 65%);
+  pointer-events:none;
+}
+.footer-container{
+  max-width:1280px; margin:0 auto; position:relative;
+  display:grid; grid-template-columns:2fr 1fr 1fr;
+  gap:40px; padding-bottom:30px;
+  border-bottom:1px solid rgba(139,163,189,.12);
+}
+.footer-section h3,.footer-section h4{
+  color:#fff; margin-bottom:16px; font-size:.98rem;
+  font-weight:700; letter-spacing:-.01em;
+}
+.footer-section h3{display:inline-flex; align-items:center; gap:9px}
+.footer-section h3 i{
+  width:30px; height:30px; border-radius:9px;
+  background:linear-gradient(135deg,var(--brand-1),var(--brand-2));
+  color:#fff; display:inline-grid; place-items:center; font-size:.85rem;
+}
+.footer-section p{font-size:.86rem; line-height:1.75; max-width:360px}
+.footer-section ul{list-style:none; display:flex; flex-direction:column; gap:11px}
+.footer-section ul li{font-size:.86rem}
+.footer-section ul a{color:#8ba3bd; font-weight:500}
+.footer-section ul a:hover{color:#5eead4}
+.footer-section ul i{margin-right:9px; color:#5eead4; width:14px}
+.footer-bottom{
+  text-align:center; padding-top:22px;
+  font-size:.78rem; color:#5a6f88; position:relative;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media(max-width:960px){
+  .nav-menu{
+    position:absolute; top:100%; left:0; right:0;
+    background:#fff; flex-direction:column; align-items:stretch;
+    padding:18px 22px; gap:16px;
+    border-bottom:1px solid var(--line);
+    box-shadow:0 24px 34px -22px rgba(15,40,80,.3);
+    display:none; border-radius:0 0 20px 20px;
+  }
+  .nav-menu.open{display:flex}
+  .nav-links{
+    flex-direction:column; align-items:stretch; gap:4px;
+    background:transparent; border:none; padding:0;
+  }
+  .nav-link{padding:11px 14px; border-radius:12px}
+  .nav-auth{flex-direction:column; align-items:stretch; gap:10px}
+  .nav-auth .btn{width:100%}
+  .hamburger{display:flex; margin-left:auto}
+  .footer-container{grid-template-columns:1fr; gap:28px}
+  .chat-page{height:calc(100vh - 130px); padding:0 12px}
+  .msg{max-width:92%}
+}
+@media(max-width:520px){
+  .hero{padding:56px 20px 72px}
+  .hero-stats{padding:12px 14px; gap:6px}
+  .hero-stat{padding:0 10px}
+  .hero-stat strong{font-size:1rem}
+  .nav-container{padding:12px 18px}
+  .container,.content-section,.features,.disclaimer-banner,.dashboard-page,.chat-page{padding-left:18px; padding-right:18px}
+}
+
+/* ============================================================
+   PRINT
+   ============================================================ */
+@media print{
+  .no-print,.navbar,.footer,.flash-container{display:none !important}
+  body{background:#fff; padding:0}
+  main{padding:0}
+  .print-area{box-shadow:none !important; border:none !important}
+}
+
+/* utilities */
+.hidden{display:none !important}
+.text-center{text-align:center}
+.mt-20{margin-top:20px}
+.mb-20{margin-bottom:20px}
+.text-muted{color:var(--muted); font-size:.82rem; font-style:italic}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     NAVBAR
+     ============================================================ -->
+<nav class="navbar no-print">
+  <div class="nav-container">
+    <a href="#/" class="nav-logo" data-nav>
+      <span class="nav-logo-mark"><i class="fas fa-heart-pulse"></i></span>
+      <span>MedIntel</span>
+    </a>
+
+    <div class="nav-menu" id="navMenu">
+      <ul class="nav-links">
+        <li><a href="#/" class="nav-link" data-nav data-page="home"><i class="fas fa-house"></i> Home</a></li>
+        <li><a href="#/about" class="nav-link" data-nav data-page="about"><i class="fas fa-circle-info"></i> About</a></li>
+        <li><a href="#/contact" class="nav-link" data-nav data-page="contact"><i class="fas fa-envelope"></i> Contact</a></li>
+
+        <li class="role-doctor hidden"><a href="#/dashboard" class="nav-link" data-nav data-page="dashboard"><i class="fas fa-gauge"></i> Dashboard</a></li>
+        <li class="role-doctor hidden"><a href="#/chat" class="nav-link" data-nav data-page="chat"><i class="fas fa-comment-medical"></i> Chat</a></li>
+        <li class="role-doctor hidden"><a href="#/history" class="nav-link" data-nav data-page="history"><i class="fas fa-clock-rotate-left"></i> History</a></li>
+
+        <li class="role-admin hidden"><a href="#/admin" class="nav-link" data-nav data-page="admin"><i class="fas fa-shield-halved"></i> Admin</a></li>
+        <li class="role-admin hidden"><a href="#/admin/users" class="nav-link" data-nav data-page="admin-users"><i class="fas fa-users-gear"></i> Users</a></li>
+        <li class="role-admin hidden"><a href="#/admin/chats" class="nav-link" data-nav data-page="admin-chats"><i class="fas fa-comments"></i> All Chats</a></li>
+      </ul>
+
+      <div class="nav-auth" id="navAuth"></div>
+    </div>
+
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="flash-container" id="flashContainer"></div>
+
+<main id="app"></main>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer class="footer no-print">
+  <div class="footer-container">
+    <div class="footer-section">
+      <h3><i class="fas fa-heart-pulse"></i> MedIntel</h3>
+      <p>AI-powered medical assistant for preliminary health guidance. Running 100% offline with Mistral 7B — your data never leaves your machine.</p>
+    </div>
+    <div class="footer-section">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="#/" data-nav><i class="fas fa-house"></i> Home</a></li>
+        <li><a href="#/about" data-nav><i class="fas fa-circle-info"></i> About</a></li>
+        <li><a href="#/contact" data-nav><i class="fas fa-envelope"></i> Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-section">
+      <h4>Emergency</h4>
+      <ul>
+        <li><i class="fas fa-phone"></i> Call 911</li>
+        <li><i class="fas fa-envelope"></i> riteshshinde369@gmail.com</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2026 MedIntel · Not a substitute for professional medical advice.</p>
+  </div>
+</footer>
+
+<script>
+/* =========================================================
+   1. STORAGE
+   ========================================================= */
+const DB = {
+  usersKey:'medintel_users',
+  sessionKey:'medintel_session',
+  chatsKey:'medintel_chats',
+
+  users(){ try{return JSON.parse(localStorage.getItem(this.usersKey))||[]}catch{return[]} },
+  saveUsers(u){ localStorage.setItem(this.usersKey, JSON.stringify(u)) },
+
+  session(){ try{return JSON.parse(localStorage.getItem(this.sessionKey))}catch{return null} },
+  setSession(u){ u ? localStorage.setItem(this.sessionKey, JSON.stringify(u))
+                  : localStorage.removeItem(this.sessionKey) },
+
+  chats(){ try{return JSON.parse(localStorage.getItem(this.chatsKey))||[]}catch{return[]} },
+  saveChats(c){ localStorage.setItem(this.chatsKey, JSON.stringify(c)) },
+  addChat(e){ const c=this.chats(); c.unshift(e); this.saveChats(c); },
+  chatsByUser(uid){ return this.chats().filter(c=>c.user_id===uid) },
+  deleteUserChats(uid){
+    const c = this.chats().filter(x=>x.user_id!==uid);
+    this.saveChats(c);
+  }
+};
+
+/* seed admin + demo doctor */
+(function seed(){
+  const users = DB.users();
+  let changed = false;
+
+  if(!users.find(u=>u.username==='admin')){
+    users.push({
+      id:'u_admin',
+      full_name:'System Admin',
+      username:'admin',
+      email:'admin@medintel.local',
+      password:'admin123',
+      role:'admin',
+      created_at:new Date().toISOString()
+    });
+    changed = true;
+  }
+
+  if(!users.find(u=>u.username==='doctor')){
+    users.push({
+      id:'u_doctor_demo',
+      full_name:'Dr. Demo Doctor',
+      username:'doctor',
+      email:'doctor@medintel.local',
+      password:'doctor123',
+      role:'doctor',
+      created_at:new Date().toISOString()
+    });
+    changed = true;
+  }
+
+  if(changed) DB.saveUsers(users);
+})();
+
+/* =========================================================
+   2. MOCK AI
+   ========================================================= */
+const AI = {
+  kb:[
+    { keys:['diabetes','blood sugar','glucose','mellitus'],
+      html:`<h3>Diabetes Mellitus — Symptoms</h3>
+      <ul>
+        <li><strong>Polyuria</strong> — frequent urination</li>
+        <li><strong>Polydipsia</strong> — excessive thirst</li>
+        <li><strong>Polyphagia</strong> — increased hunger</li>
+        <li>Fatigue, blurred vision, slow wound healing</li>
+        <li>Unexplained weight loss (type 1)</li>
+      </ul>
+      <p>Diagnosis: fasting glucose ≥126 mg/dL, HbA1c ≥6.5%, or OGTT ≥200 mg/dL.</p>
+      <div class="note">Lifestyle + metformin are first-line for type 2.</div>` },
+    { keys:['malaria','plasmodium'],
+      html:`<h3>Malaria — Treatment</h3>
+      <p><strong>Uncomplicated P. falciparum:</strong> Artemisinin-based combination therapy (ACT) — e.g., artemether-lumefantrine.</p>
+      <p><strong>Severe malaria:</strong> IV artesunate followed by ACT.</p>
+      <p><strong>P. vivax/ovale:</strong> Chloroquine + primaquine (check G6PD).</p>
+      <div class="note">Always confirm with rapid diagnostic test or blood smear.</div>` },
+    { keys:['meningitis','meningococcal'],
+      html:`<h3>Meningitis — Causes</h3>
+      <ul>
+        <li><strong>Bacterial:</strong> S. pneumoniae, N. meningitidis, H. influenzae, Listeria</li>
+        <li><strong>Viral:</strong> Enteroviruses, HSV-2, mumps</li>
+        <li><strong>Fungal:</strong> Cryptococcus (immunocompromised)</li>
+      </ul>
+      <p>Classic triad: fever + neck stiffness + altered mental status.</p>
+      <div class="note">Bacterial meningitis is a medical emergency — start empiric antibiotics immediately.</div>` },
+    { keys:['osteomyelitis','bone infection'],
+      html:`<h3>Osteomyelitis</h3>
+      <p>Infection of bone, most commonly by <em>S. aureus</em>. Routes: hematogenous, contiguous spread, direct inoculation.</p>
+      <p><strong>Diagnosis:</strong> MRI is the imaging of choice; blood cultures + bone biopsy for organism.</p>
+      <p><strong>Treatment:</strong> prolonged IV antibiotics (4–6 weeks), surgical debridement if needed.</p>
+      <div class="note">Risk factors: diabetes, IV drug use, prosthetic joints, recent surgery.</div>` },
+    { keys:['leprosy','hansen'],
+      html:`<h3>Leprosy (Hansen's Disease) — Symptoms</h3>
+      <ul>
+        <li>Hypopigmented or erythematous skin patches with <strong>loss of sensation</strong></li>
+        <li>Thickened peripheral nerves</li>
+        <li>Painless ulcers on hands/feet</li>
+        <li>Nasal congestion, epistaxis (lepromatous form)</li>
+      </ul>
+      <p>Caused by <em>Mycobacterium leprae</em>. Treated with multi-drug therapy (dapsone + rifampicin + clofazimine).</p>` },
+    { keys:['influenza','flu','fever'],
+      html:`<h3>Influenza — Common Symptoms</h3>
+      <ul>
+        <li><strong>Sudden fever</strong> 38–40 °C</li>
+        <li>Chills, sweats, muscle aches</li>
+        <li>Dry cough, sore throat, runny nose</li>
+        <li>Headache and marked fatigue</li>
+      </ul>
+      <div class="note">Seek care if breathing difficulty or high fever persists.</div>` },
+    { keys:['ibuprofen','nsaid','painkiller'],
+      html:`<h3>Ibuprofen — Side Effects</h3>
+      <p><strong>Common:</strong> upset stomach, nausea, heartburn, dizziness.</p>
+      <p><strong>Serious (rare):</strong> GI bleeding, kidney problems, cardiovascular risk with long-term use.</p>
+      <div class="note">Do not exceed 1200 mg/day OTC without supervision.</div>` },
+    { keys:['blood pressure','hypertension','bp'],
+      html:`<h3>Managing Hypertension</h3>
+      <ul>
+        <li>DASH-style diet, sodium &lt; 1500–2300 mg/day</li>
+        <li>150 min/week exercise</li>
+        <li>Healthy weight, limit alcohol, stop smoking</li>
+      </ul>
+      <div class="note">Monitor BP and follow clinician's plan.</div>` },
+    { keys:['headache','migraine'],
+      html:`<h3>Headache Relief</h3>
+      <p>Tension: dull band-like tightness.<br>Migraine: throbbing, one-sided, light sensitivity.</p>
+      <p>Relief: dark quiet room, hydration, OTC analgesics.</p>
+      <div class="note">Emergency if thunderclap onset or with fever + stiff neck.</div>` },
+    { keys:['covid','coronavirus'],
+      html:`<h3>COVID-19</h3>
+      <p>Symptoms: fever, cough, fatigue, loss of taste/smell, breathlessness.</p>
+      <p>Prevention: vaccination, hand hygiene, ventilation, masks.</p>` }
+  ],
+  answer(q){
+    const s=(q||'').toLowerCase().trim();
+    if(!s) return this.fallback();
+    let best=null,score=0;
+    for(const e of this.kb){
+      let sc=0;
+      for(const k of e.keys) if(s.includes(k)) sc++;
+      if(sc>score){score=sc;best=e;}
+    }
+    return best ? best.html : this.fallback();
+  },
+  fallback(){
+    return `<h3>I don't have that in my demo library</h3>
+      <p>Try one of these:</p>
+      <ul>
+        <li>Diabetes symptoms</li>
+        <li>Malaria treatment</li>
+        <li>Meningitis causes</li>
+        <li>Osteomyelitis</li>
+        <li>Leprosy symptoms</li>
+        <li>Influenza, ibuprofen, hypertension, headache, COVID-19</li>
+      </ul>
+      <div class="note">In a full deployment this would query the Mistral 7B RAG pipeline.</div>`;
+  }
+};
+
+/* =========================================================
+   3. HELPERS
+   ========================================================= */
+const $  = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+const esc = s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function fmtDate(iso){
+  return new Date(iso).toLocaleString('en-US',
+    {month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function fmtDateShort(iso){
+  return new Date(iso).toLocaleDateString('en-US',
+    {month:'short',day:'numeric',year:'numeric'});
+}
+function toast(msg,type='info'){
+  const box=$('#flashContainer');
+  const el=document.createElement('div');
+  el.className=`flash flash-${type}`;
+  el.innerHTML=`<span>${esc(msg)}</span><button class="flash-close">&times;</button>`;
+  el.querySelector('.flash-close').addEventListener('click',()=>el.remove());
+  box.appendChild(el);
+  setTimeout(()=>el.remove(),4200);
+}
+const uid = p => p+'_'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const stripTags = html => html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+
+/* =========================================================
+   4. ROUTER
+   ========================================================= */
+const routes = {
+  '':'home','/':'home',
+  '/about':'about','/contact':'contact',
+  '/login':'login','/register':'register',
+  '/dashboard':'dashboard','/chat':'chat','/history':'history','/print':'print',
+  '/admin':'admin','/admin/users':'admin-users','/admin/chats':'admin-chats',
+  '/admin/print':'admin-print'
+};
+
+const PROTECTED = ['dashboard','chat','history','print','admin','admin-users','admin-chats','admin-print'];
+const DOCTOR_PAGES = ['dashboard','chat','history','print'];
+const ADMIN_PAGES  = ['admin','admin-users','admin-chats','admin-print'];
+
+function currentRoute(){
+  const h = location.hash.replace(/^#/,'') || '/';
+  return routes[h] || 'home';
+}
+function navigate(h){ location.hash = h; }
+
+function render(){
+  const page = currentRoute();
+  const user = DB.session();
+
+  if(PROTECTED.includes(page) && !user){
+    toast('Please log in first','error'); navigate('/login'); return;
+  }
+  if(DOCTOR_PAGES.includes(page) && user && !['doctor','admin'].includes(user.role)){
+    toast('Doctors only','error'); navigate('/'); return;
+  }
+  if(ADMIN_PAGES.includes(page) && user && user.role !== 'admin'){
+    toast('Admins only','error'); navigate('/'); return;
+  }
+
+  $$('.nav-link').forEach(a=>a.classList.toggle('active', a.dataset.page===page));
+
+  const app = $('#app');
+  app.innerHTML = (views[page]||views.home)(user);
+
+  if(page==='chat')         setupChat();
+  if(page==='login')        setupLogin();
+  if(page==='register')     setupRegister();
+  if(page==='contact')      setupContact();
+  if(page==='admin-users')  setupAdminUsers();
+
+  renderNavAuth();
+  applyRoleVisibility();
+  $('#navMenu').classList.remove('open');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* =========================================================
+   5. NAV AUTH
+   ========================================================= */
+function renderNavAuth(){
+  const user = DB.session();
+  const box = $('#navAuth');
+  if(!user){
+    box.innerHTML = `
+      <a href="#/login" class="btn btn-sm btn-outline" data-nav><i class="fas fa-right-to-bracket"></i> Login</a>
+      <a href="#/register" class="btn btn-sm btn-primary" data-nav><i class="fas fa-user-plus"></i> Register</a>`;
+  } else {
+    const icon = user.role==='admin' ? 'user-shield' : 'user-doctor';
+    box.innerHTML = `
+      <span class="user-badge ${user.role}">
+        <i class="fas fa-${icon}"></i> ${esc(user.full_name)}
+      </span>
+      <a href="#" id="logoutBtn" class="btn btn-sm btn-ghost">
+        <i class="fas fa-right-from-bracket"></i>
+      </a>`;
+    $('#logoutBtn').addEventListener('click', e=>{
+      e.preventDefault();
+      DB.setSession(null);
+      toast('Logged out','success');
+      navigate('/'); render();
+    });
+  }
+}
+function applyRoleVisibility(){
+  const u = DB.session();
+  $$('.role-doctor').forEach(el=>{
+    el.classList.toggle('hidden',
+      !(u && (u.role==='doctor'||u.role==='admin')));
+  });
+  $$('.role-admin').forEach(el=>{
+    el.classList.toggle('hidden', !(u && u.role==='admin'));
+  });
+}
+
+/* =========================================================
+   6. VIEWS
+   ========================================================= */
+const views = {};
+
+/* ---------- HOME ---------- */
+views.home = user=>`
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="hero-content">
+        <div class="hero-eyebrow"><i class="fas fa-microchip"></i> Mistral 7B · 100% Offline</div>
+        <h1>Clinical intelligence<br>at your <span class="accent">fingertips</span>.</h1>
+        <p>MedIntel brings AI-assisted medical guidance to doctors and clinicians — running entirely on your machine, with zero cloud dependency and complete data privacy.</p>
+        <div class="hero-buttons">
+          ${ user
+            ? `<a href="#/dashboard" class="btn btn-primary btn-lg" data-nav>
+                 <i class="fas fa-gauge"></i> Go to Dashboard</a>
+               ${ (user.role==='doctor'||user.role==='admin')
+                  ? `<a href="#/chat" class="btn btn-outline btn-lg" data-nav>
+                       <i class="fas fa-comment-medical"></i> Start Chat</a>` : '' }`
+            : `<a href="#/register" class="btn btn-primary btn-lg" data-nav>
+                 <i class="fas fa-rocket"></i> Get Started</a>
+               <a href="#/login" class="btn btn-outline btn-lg" data-nav>
+                 <i class="fas fa-right-to-bracket"></i> Sign In</a>` }
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="pulse-ring"></div>
+        <div class="hero-icon"><i class="fas fa-stethoscope"></i></div>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><strong>7B</strong><span>Parameters</span></div>
+      <div class="hero-stat"><strong>FAISS</strong><span>Vector Search</span></div>
+      <div class="hero-stat"><strong>0</strong><span>Cloud Calls</span></div>
+      <div class="hero-stat"><strong>24/7</strong><span>Available</span></div>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="features-header">
+      <span>Capabilities</span>
+      <h2>Built for modern clinicians</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-comments"></i></div>
+        <h3>Evidence-based Chat</h3>
+        <p>Ask medical questions and receive responses grounded in indexed clinical literature.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon purple"><i class="fas fa-lock"></i></div>
+        <h3>Private by Design</h3>
+        <p>All inference runs locally via llama.cpp. Patient data never touches a server.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon amber"><i class="fas fa-print"></i></div>
+        <h3>Printable Reports</h3>
+        <p>Save and print consultation transcripts for patient records in seconds.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon rose"><i class="fas fa-user-shield"></i></div>
+        <h3>Role-based Access</h3>
+        <p>Separate dashboards for doctors and administrators with secure scoping.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="disclaimer-banner">
+    <div class="disclaimer-content">
+      <i class="fas fa-triangle-exclamation"></i>
+      <div>
+        <h3>Medical Disclaimer</h3>
+        <p>MedIntel is for informational purposes only. Always consult a qualified medical professional for diagnosis and treatment. In emergencies, call 911.</p>
+      </div>
+    </div>
+  </section>`;
+
+/* ---------- ABOUT ---------- */
+views.about = ()=>`
+  <div class="page-header">
+    <h1>About MedIntel</h1>
+    <p>Empowering healthcare professionals with AI-assisted medical guidance</p>
+  </div>
+  <div class="content-section">
+    <div class="about-grid">
+      <div class="about-card">
+        <i class="fas fa-brain"></i>
+        <h3>Powered by Mistral 7B</h3>
+        <p>Mistral 7B Instruct runs locally via llama.cpp for fast, private inference on medical literature.</p>
+      </div>
+      <div class="about-card">
+        <i class="fas fa-database"></i>
+        <h3>Medical Knowledge Base</h3>
+        <p>Curated textbooks and reference materials, indexed with FAISS vector search for accurate retrieval.</p>
+      </div>
+      <div class="about-card">
+        <i class="fas fa-lock"></i>
+        <h3>Privacy First</h3>
+        <p>Everything runs offline — no cloud APIs, no data sharing. Consultations stay on your machine.</p>
+      </div>
+      <div class="about-card">
+        <i class="fas fa-code"></i>
+        <h3>Open Architecture</h3>
+        <p>Built with Flask, LangChain, and FAISS. Modular design allows easy extension and customization.</p>
+      </div>
+    </div>
+  </div>`;
+
+/* ---------- CONTACT ---------- */
+views.contact = ()=>`
+  <div class="page-header">
+    <h1>Contact Us</h1>
+    <p>Have questions or feedback? We'd love to hear from you.</p>
+  </div>
+  <div class="content-section">
+    <div class="contact-grid">
+      <div class="contact-info">
+        <div class="contact-item">
+          <i class="fas fa-envelope"></i>
+          <div><h3>Email</h3><p>riteshshinde369@gmail.com</p></div>
+        </div>
+        <div class="contact-item">
+          <i class="fas fa-phone"></i>
+          <div><h3>Emergency</h3><p>For medical emergencies, call 911</p></div>
+        </div>
+        <div class="contact-item">
+          <i class="fas fa-clock"></i>
+          <div><h3>Availability</h3><p>MedIntel assistant available 24/7 (offline)</p></div>
+        </div>
+      </div>
+      <div class="contact-form-card">
+        <h3>Send a Message</h3>
+        <form id="contactForm">
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" id="c-name" placeholder="Your name" required>
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="c-email" placeholder="your@email.com" required>
+          </div>
+          <div class="form-group">
+            <label>Message</label>
+            <textarea id="c-msg" rows="5" placeholder="Your message..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">
+            <i class="fas fa-paper-plane"></i> Send Message
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>`;
+
+/* ---------- LOGIN ---------- */
+views.login = ()=>`
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-header">
+        <i class="fas fa-user-doctor"></i>
+        <h2>Welcome Back</h2>
+        <p>Sign in to your MedIntel account</p>
+      </div>
+      <form id="loginForm" class="auth-form" autocomplete="off">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="l-user" placeholder="Enter your username" required autofocus>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="l-pass" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">
+          <i class="fas fa-right-to-bracket"></i> Login
+        </button>
+      </form>
+      <div class="auth-footer">
+        <p>Don't have an account? <a href="#/register" data-nav>Register here</a></p>
+        <p style="font-size:.76rem;color:#94a3b8">
+          Demo — admin: <strong>admin/admin123</strong> · doctor: <strong>doctor/doctor123</strong>
+        </p>
+      </div>
+    </div>
+  </div>`;
+
+/* ---------- REGISTER ---------- */
+views.register = ()=>`
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-header">
+        <i class="fas fa-user-plus"></i>
+        <h2>Create Account</h2>
+        <p>Register as a Doctor on MedIntel</p>
+      </div>
+      <form id="registerForm" class="auth-form" autocomplete="off">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="r-name" placeholder="Dr. John Smith" required>
+        </div>
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="r-user" placeholder="Choose a username" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="r-email" placeholder="doctor@example.com" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="r-pass" placeholder="Choose a password" required>
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" id="r-pass2" placeholder="Confirm your password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">
+          <i class="fas fa-user-plus"></i> Register
+        </button>
+      </form>
+      <div class="auth-footer">
+        <p>Already have an account? <a href="#/login" data-nav>Login here</a></p>
+      </div>
+    </div>
+  </div>`;
+
+/* ---------- DOCTOR DASHBOARD ---------- */
+views.dashboard = user=>{
+  const myChats = DB.chatsByUser(user.id);
+  const recent = myChats.slice(0,5);
+  const rows = recent.length
+    ? recent.map(c=>`
+      <tr>
+        <td class="text-truncate">${esc(c.query)}</td>
+        <td class="text-truncate">${esc(stripTags(c.response).slice(0,100))}${stripTags(c.response).length>100?'…':''}</td>
+        <td>${fmtDate(c.created_at)}</td>
+        <td>
+          <a href="#/print" class="btn btn-xs btn-outline" title="Print" data-nav>
+            <i class="fas fa-print"></i>
+          </a>
+        </td>
+      </tr>`).join('')
+    : `<tr><td colspan="4" class="text-center" style="color:#94a3b8;padding:30px">
+         No consultations yet. <a href="#/chat" data-nav>Start one →</a></td></tr>`;
+
+  return `
+  <div class="dashboard-page">
+    <div class="dashboard-header">
+      <h1>Welcome, ${esc(user.full_name)}</h1>
+      <p>You have <strong>${myChats.length}</strong> consultation${myChats.length===1?'':'s'} on record.</p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon blue"><i class="fas fa-comment-medical"></i></div>
+        <div class="stat-info"><h3>${myChats.length}</h3><p>Consultations</p></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green"><i class="fas fa-robot"></i></div>
+        <div class="stat-info"><h3>Mistral 7B</h3><p>AI Model</p></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple"><i class="fas fa-wifi"></i></div>
+        <div class="stat-info"><h3>Offline</h3><p>Running Mode</p></div>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <a href="#/chat" class="action-card" data-nav>
+        <i class="fas fa-comment-medical"></i>
+        <h3>New Consultation</h3>
+        <p>Start a new AI chat</p>
+      </a>
+      <a href="#/history" class="action-card" data-nav>
+        <i class="fas fa-clock-rotate-left"></i>
+        <h3>Chat History</h3>
+        <p>View past consultations</p>
+      </a>
+      <a href="#/print" class="action-card" data-nav>
+        <i class="fas fa-print"></i>
+        <h3>Print All</h3>
+        <p>Export consultation history</p>
+      </a>
+    </div>
+
+    <div class="section-card">
+      <div class="section-header">
+        <h2><i class="fas fa-clock"></i> Recent Consultations</h2>
+        <a href="#/history" class="btn btn-sm btn-outline" data-nav>View All</a>
+      </div>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Question</th><th>Response (preview)</th><th>Date</th><th></th></tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+};
+
+/* ---------- CHAT ---------- */
+views.chat = user=>`
+  <div class="chat-page">
+    <div class="chat-container">
+      <div class="chat-header">
+        <div class="chat-title">
+          <i class="fas fa-comment-medical"></i>
+          <div>
+            <h2>AI Consultation</h2>
+            <span class="model-tag"><i class="fas fa-microchip"></i> Mistral 7B · Offline</span>
+          </div>
+        </div>
+        <div class="chat-actions">
+          <button class="btn btn-sm btn-outline" id="clearChat" title="Clear chat">
+            <i class="fas fa-eraser"></i>
+          </button>
+          <a href="#/history" class="btn btn-sm btn-outline" title="History" data-nav>
+            <i class="fas fa-clock-rotate-left"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="messages-area" id="messagesArea">
+        <div class="welcome-msg">
+          <div class="welcome-icon"><i class="fas fa-user-doctor"></i></div>
+          <h3>Welcome, ${esc(user.full_name)}</h3>
+          <p>Describe symptoms or ask any medical question. Responses are grounded in indexed medical literature.</p>
+          <p class="small-text"><i class="fas fa-circle-info"></i> AI assistant — not a replacement for clinical judgment.</p>
+          <div class="topic-suggestions">
+            <h4>Quick Questions</h4>
+            <div class="topic-btns">
+              <button class="topic-btn" data-msg="What are the symptoms of diabetes mellitus?">Diabetes symptoms</button>
+              <button class="topic-btn" data-msg="What is the treatment for malaria?">Malaria treatment</button>
+              <button class="topic-btn" data-msg="What are the causes of meningitis?">Meningitis causes</button>
+              <button class="topic-btn" data-msg="What is osteomyelitis?">Osteomyelitis</button>
+              <button class="topic-btn" data-msg="What are the symptoms of leprosy?">Leprosy symptoms</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="typing-indicator" id="typingIndicator">
+        <span></span><span></span><span></span>
+        <span class="typing-text">MedIntel is thinking…</span>
+      </div>
+
+      <div class="chat-input-area">
+        <div class="input-wrapper">
+          <textarea id="messageInput" placeholder="Type your medical question…" rows="1"></textarea>
+          <button class="send-btn" id="sendBtn" disabled>
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+        <p class="input-disclaimer">
+          <i class="fas fa-circle-exclamation"></i>
+          In emergencies, call emergency services immediately.
+        </p>
+      </div>
+    </div>
+  </div>`;
+
+/* ---------- DOCTOR HISTORY ---------- */
+views.history = user=>{
+  const chats = DB.chatsByUser(user.id);
+  if(!chats.length){
+    return `
+    <div class="dashboard-page">
+      <div class="page-header">
+        <h1>Chat History</h1>
+        <p>Your past AI consultations</p>
+      </div>
+      <div class="empty-state">
+        <i class="fas fa-comments"></i>
+        <h3>No consultations yet</h3>
+        <p>Start your first AI consultation to see history here.</p>
+        <a href="#/chat" class="btn btn-primary" data-nav><i class="fas fa-plus"></i> Start Consultation</a>
+      </div>
+    </div>`;
+  }
+
+  const cards = chats.map(c=>`
+    <div class="history-card">
+      <div class="history-meta">
+        <span class="history-date">
+          <i class="fas fa-calendar"></i> ${fmtDate(c.created_at)}
+        </span>
+        <a href="#/print" class="btn btn-xs btn-outline" data-nav>
+          <i class="fas fa-print"></i> Print
+        </a>
+      </div>
+      <div class="history-content">
+        <div class="history-question">
+          <strong><i class="fas fa-user-doctor"></i> Question</strong>
+          <p>${esc(c.query)}</p>
+        </div>
+        <div class="history-answer">
+          <strong><i class="fas fa-robot"></i> AI Response</strong>
+          <p>${esc(stripTags(c.response))}</p>
+        </div>
+      </div>
+    </div>`).join('');
+
+  return `
+  <div class="dashboard-page">
+    <div class="page-header">
+      <h1>Chat History</h1>
+      <p>Your past AI consultations</p>
+    </div>
+    <div class="section-actions">
+      <a href="#/chat" class="btn btn-primary" data-nav><i class="fas fa-plus"></i> New Consultation</a>
+      <a href="#/print" class="btn btn-outline" data-nav><i class="fas fa-print"></i> Print All</a>
+    </div>
+    <div class="history-list">${cards}</div>
+  </div>`;
+};
+
+/* ---------- PRINT ---------- */
+views.print = user=>{
+  const chats = DB.chatsByUser(user.id);
+  const entries = chats.length
+    ? chats.map(c=>`
+      <div class="print-entry">
+        <div class="print-meta">
+          <strong>Doctor:</strong> ${esc(user.full_name)} &nbsp;|&nbsp;
+          <strong>Date:</strong> ${fmtDate(c.created_at)}
+        </div>
+        <div class="print-q"><strong>Patient Question:</strong><p>${esc(c.query)}</p></div>
+        <div class="print-a"><strong>AI Medical Response:</strong><p>${esc(stripTags(c.response))}</p></div>
+      </div>`).join('')
+    : `<p style="text-align:center;color:#94a3b8;padding:40px">No consultations to print.</p>`;
+
+  return `
+  <div class="print-area">
+    <div class="print-header">
+      <h1>MedIntel — Consultation Report</h1>
+      <p>Generated ${fmtDate(new Date().toISOString())}</p>
+      <p>Medical AI Consultation Report</p>
+    </div>
+    <div class="print-actions no-print">
+      <button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+      <button class="btn btn-outline" onclick="history.back()">Close</button>
+    </div>
+    ${entries}
+    <div class="print-footer">
+      <p><strong>Disclaimer:</strong> AI-generated for informational purposes only. Not a substitute for professional medical advice.</p>
+      <p>&copy; 2026 MedIntel Medical Assistant</p>
+    </div>
+  </div>
+  <style>
+    .print-area{max-width:820px; margin:0 auto; padding:20px; font-family:'Times New Roman',serif; color:#333}
+    .print-header{text-align:center; border-bottom:2px solid #0d9488; padding-bottom:15px; margin-bottom:25px}
+    .print-header h1{color:#0d9488; font-size:22px; margin-bottom:5px}
+    .print-header p{font-size:12px; color:#666}
+    .print-actions{text-align:center; margin-bottom:20px; display:flex; gap:10px; justify-content:center}
+    .print-entry{border:1px solid #ddd; border-radius:6px; padding:15px; margin-bottom:15px; page-break-inside:avoid}
+    .print-meta{font-size:11px; color:#888; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid #eee}
+    .print-q strong{color:#0369a1}
+    .print-a strong{color:#0f766e}
+    .print-entry p{margin-top:5px; line-height:1.6; font-size:13px; white-space:pre-wrap}
+    .print-footer{margin-top:30px; text-align:center; font-size:11px; color:#999; border-top:1px solid #ddd; padding-top:10px}
+    @media print{.no-print{display:none !important} body{background:#fff}}
+  </style>`;
+};
+
+/* ---------- ADMIN DASHBOARD ---------- */
+views.admin = ()=>{
+  const users = DB.users();
+  const doctors = users.filter(u=>u.role==='doctor');
+  const chats = DB.chats();
+  const recentUsers = [...users].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,5);
+  const recentChats = chats.slice(0,5);
+
+  const userRows = recentUsers.map(u=>`
+    <tr>
+      <td>${esc(u.full_name)}</td>
+      <td>${esc(u.username)}</td>
+      <td>${esc(u.email)}</td>
+      <td><span class="role-badge ${u.role==='admin'?'admin':''}">${esc(u.role)}</span></td>
+      <td>${fmtDateShort(u.created_at)}</td>
+    </tr>`).join('');
+
+  const chatRows = recentChats.length
+    ? recentChats.map(c=>`
+      <tr>
+        <td>${esc(c.user_name)}</td>
+        <td class="text-truncate">${esc(c.query)}</td>
+        <td>${fmtDate(c.created_at)}</td>
+        <td>
+          <a href="#/admin/print" class="btn btn-xs btn-outline" data-nav>
+            <i class="fas fa-print"></i>
+          </a>
+        </td>
+      </tr>`).join('')
+    : `<tr><td colspan="4" class="text-center" style="color:#94a3b8;padding:30px">No chats yet.</td></tr>`;
+
+  return `
+  <div class="dashboard-page">
+    <div class="dashboard-header">
+      <h1><i class="fas fa-shield-halved"></i> Admin Dashboard</h1>
+      <p>System overview · <strong>${users.length}</strong> users · <strong>${chats.length}</strong> chats</p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+        <div class="stat-info"><h3>${users.length}</h3><p>Total Users</p></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green"><i class="fas fa-user-doctor"></i></div>
+        <div class="stat-info"><h3>${doctors.length}</h3><p>Doctors</p></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple"><i class="fas fa-comment-medical"></i></div>
+        <div class="stat-info"><h3>${chats.length}</h3><p>Total Chats</p></div>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <a href="#/admin/users" class="action-card" data-nav>
+        <i class="fas fa-users-gear"></i>
+        <h3>Manage Users</h3>
+        <p>View and manage all users</p>
+      </a>
+      <a href="#/admin/chats" class="action-card" data-nav>
+        <i class="fas fa-comments"></i>
+        <h3>All Chats</h3>
+        <p>View every consultation log</p>
+      </a>
+      <a href="#/admin/print" class="action-card" data-nav>
+        <i class="fas fa-print"></i>
+        <h3>Print All</h3>
+        <p>Complete chat history</p>
+      </a>
+    </div>
+
+    <div class="section-card">
+      <div class="section-header">
+        <h2><i class="fas fa-user-plus"></i> Recent Users</h2>
+        <a href="#/admin/users" class="btn btn-sm btn-outline" data-nav>View All</a>
+      </div>
+      <div class="table-responsive">
+        <table>
+          <thead><tr><th>Name</th><th>Username</th><th>Email</th><th>Role</th><th>Joined</th></tr></thead>
+          <tbody>${userRows}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-header">
+        <h2><i class="fas fa-clock"></i> Recent Chats</h2>
+        <a href="#/admin/chats" class="btn btn-sm btn-outline" data-nav>View All</a>
+      </div>
+      <div class="table-responsive">
+        <table>
+          <thead><tr><th>User</th><th>Question</th><th>Date</th><th></th></tr></thead>
+          <tbody>${chatRows}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+};
+
+/* ---------- ADMIN USERS ---------- */
+views['admin-users'] = ()=>{
+  const me = DB.session();
+  const users = DB.users();
+  const rows = users.map(u=>`
+    <tr data-user="${u.id}">
+      <td style="font-size:.75rem;color:#94a3b8;font-family:'JetBrains Mono',monospace">${esc(u.id)}</td>
+      <td>${esc(u.full_name)}</td>
+      <td>${esc(u.username)}</td>
+      <td>${esc(u.email)}</td>
+      <td><span class="role-badge ${u.role==='admin'?'admin':''}">${esc(u.role)}</span></td>
+      <td>${fmtDateShort(u.created_at)}</td>
+      <td>${DB.chatsByUser(u.id).length}</td>
+      <td>
+        ${ u.id === me.id
+          ? `<span class="text-muted">You</span>`
+          : `<button class="btn btn-xs btn-danger delete-user-btn" data-id="${u.id}" data-name="${esc(u.username)}">
+               <i class="fas fa-trash"></i>
+             </button>` }
+      </td>
+    </tr>`).join('');
+
+  return `
+  <div class="dashboard-page">
+    <div class="page-header">
+      <h1><i class="fas fa-users"></i> User Management</h1>
+      <p>All registered users (${users.length} total)</p>
+    </div>
+    <div class="section-card">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Full Name</th><th>Username</th>
+              <th>Email</th><th>Role</th><th>Joined</th>
+              <th>Chats</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+};
+
+/* ---------- ADMIN CHATS ---------- */
+views['admin-chats'] = ()=>{
+  const chats = DB.chats();
+  if(!chats.length){
+    return `
+    <div class="dashboard-page">
+      <div class="page-header">
+        <h1><i class="fas fa-comments"></i> All Chat Logs</h1>
+        <p>0 total consultations</p>
+      </div>
+      <div class="empty-state">
+        <i class="fas fa-comments"></i>
+        <h3>No chats yet</h3>
+        <p>Chat logs will appear here once doctors start consultations.</p>
+      </div>
+    </div>`;
+  }
+
+  const cards = chats.map(c=>`
+    <div class="history-card">
+      <div class="history-meta">
+        <div class="history-meta-left">
+          <span class="history-user"><i class="fas fa-user-doctor"></i> ${esc(c.user_name)}</span>
+          <span class="history-date"><i class="fas fa-calendar"></i> ${fmtDate(c.created_at)}</span>
+        </div>
+        <a href="#/admin/print" class="btn btn-xs btn-outline" data-nav>
+          <i class="fas fa-print"></i> Print
+        </a>
+      </div>
+      <div class="history-content">
+        <div class="history-question">
+          <strong><i class="fas fa-circle-question"></i> Question</strong>
+          <p>${esc(c.query)}</p>
+        </div>
+        <div class="history-answer">
+          <strong><i class="fas fa-robot"></i> AI Response</strong>
+          <p>${esc(stripTags(c.response))}</p>
+        </div>
+      </div>
+    </div>`).join('');
+
+  return `
+  <div class="dashboard-page">
+    <div class="page-header">
+      <h1><i class="fas fa-comments"></i> All Chat Logs</h1>
+      <p>${chats.length} total consultations</p>
+    </div>
+    <div class="section-actions">
+      <a href="#/admin/print" class="btn btn-outline" data-nav><i class="fas fa-print"></i> Print All</a>
+    </div>
+    <div class="history-list">${cards}</div>
+  </div>`;
+};
+
+/* ---------- ADMIN PRINT ---------- */
+views['admin-print'] = ()=>{
+  const chats = DB.chats();
+  const entries = chats.length
+    ? chats.map(c=>`
+      <div class="print-entry">
+        <div class="print-meta">
+          <strong>Doctor:</strong> ${esc(c.user_name)} &nbsp;|&nbsp;
+          <strong>Date:</strong> ${fmtDate(c.created_at)}
+        </div>
+        <div class="print-q"><strong>Patient Question:</strong><p>${esc(c.query)}</p></div>
+        <div class="print-a"><strong>AI Medical Response:</strong><p>${esc(stripTags(c.response))}</p></div>
+      </div>`).join('')
+    : `<p style="text-align:center;color:#94a3b8;padding:40px">No consultations to print.</p>`;
+
+  return `
+  <div class="print-area">
+    <div class="print-header">
+      <h1>MedIntel — All Consultations Report</h1>
+      <p>Generated ${fmtDate(new Date().toISOString())}</p>
+      <p>Complete AI Consultation History</p>
+    </div>
+    <div class="print-actions no-print">
+      <button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+      <button class="btn btn-outline" onclick="history.back()">Close</button>
+    </div>
+    ${entries}
+    <div class="print-footer">
+      <p><strong>Disclaimer:</strong> AI-generated for informational purposes only. Not a substitute for professional medical advice.</p>
+      <p>&copy; 2026 MedIntel Medical Assistant</p>
+    </div>
+  </div>
+  <style>
+    .print-area{max-width:820px; margin:0 auto; padding:20px; font-family:'Times New Roman',serif; color:#333}
+    .print-header{text-align:center; border-bottom:2px solid #0d9488; padding-bottom:15px; margin-bottom:25px}
+    .print-header h1{color:#0d9488; font-size:22px; margin-bottom:5px}
+    .print-header p{font-size:12px; color:#666}
+    .print-actions{text-align:center; margin-bottom:20px; display:flex; gap:10px; justify-content:center}
+    .print-entry{border:1px solid #ddd; border-radius:6px; padding:15px; margin-bottom:15px; page-break-inside:avoid}
+    .print-meta{font-size:11px; color:#888; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid #eee}
+    .print-q strong{color:#0369a1}
+    .print-a strong{color:#0f766e}
+    .print-entry p{margin-top:5px; line-height:1.6; font-size:13px; white-space:pre-wrap}
+    .print-footer{margin-top:30px; text-align:center; font-size:11px; color:#999; border-top:1px solid #ddd; padding-top:10px}
+    @media print{.no-print{display:none !important} body{background:#fff}}
+  </style>`;
+};
+
+/* =========================================================
+   7. PAGE SETUP
+   ========================================================= */
+function setupLogin(){
+  $('#loginForm').addEventListener('submit', e=>{
+    e.preventDefault();
+    const u = $('#l-user').value.trim();
+    const p = $('#l-pass').value;
+    const user = DB.users().find(x=>x.username===u && x.password===p);
+    if(!user){ toast('Invalid username or password','error'); return; }
+    DB.setSession(user);
+    toast(`Welcome back, ${user.full_name}!`,'success');
+    navigate(user.role==='admin' ? '/admin' : '/dashboard');
+    render();
+  });
+}
+
+function setupRegister(){
+  $('#registerForm').addEventListener('submit', e=>{
+    e.preventDefault();
+    const full_name = $('#r-name').value.trim();
+    const username  = $('#r-user').value.trim();
+    const email     = $('#r-email').value.trim();
+    const pass      = $('#r-pass').value;
+    const pass2     = $('#r-pass2').value;
+
+    if(pass !== pass2){ toast('Passwords do not match','error'); return; }
+    if(pass.length < 6){ toast('Password must be at least 6 characters','error'); return; }
+
+    const users = DB.users();
+    if(users.find(u=>u.username===username)){ toast('Username already taken','error'); return; }
+    if(users.find(u=>u.email===email)){ toast('Email already registered','error'); return; }
+
+    const newUser = {
+      id: uid('u'),
+      full_name, username, email,
+      password: pass,
+      role: 'doctor',
+      created_at: new Date().toISOString()
+    };
+    users.push(newUser);
+    DB.saveUsers(users);
+    DB.setSession(newUser);
+    toast('Account created! Welcome to MedIntel.','success');
+    navigate('/dashboard'); render();
+  });
+}
+
+function setupContact(){
+  const f = $('#contactForm');
+  if(!f) return;
+  f.addEventListener('submit', e=>{
+    e.preventDefault();
+    toast('Message sent! We will get back to you soon.','success');
+    f.reset();
+  });
+}
+
+/* ---------- CHAT ---------- */
+function setupChat(){
+  const box   = $('#messagesArea');
+  const input = $('#messageInput');
+  const send  = $('#sendBtn');
+  const typing= $('#typingIndicator');
+  const clear = $('#clearChat');
+  const user  = DB.session();
+
+  input.addEventListener('input', ()=>{
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 140) + 'px';
+    send.disabled = !input.value.trim();
+  });
+
+  const addMsg = (html, who)=>{
+    const d = document.createElement('div');
+    d.className = `msg ${who}`;
+    if(who==='bot') d.innerHTML = html;
+    else d.textContent = html;
+    box.appendChild(d);
+    box.scrollTop = box.scrollHeight;
+    return d;
+  };
+
+  let busy = false;
+  async function handleSend(text){
+    if(!text || busy) return;
+    busy = true; send.disabled = true;
+    addMsg(text, 'user');
+    input.value = ''; input.style.height = 'auto';
+    typing.classList.add('active');
+
+    await new Promise(r=>setTimeout(r, 500 + Math.random()*500));
+    const html = AI.answer(text);
+    typing.classList.remove('active');
+    addMsg(html, 'bot');
+
+    DB.addChat({
+      id: uid('c'),
+      user_id: user.id,
+      user_name: user.full_name,
+      user_username: user.username,
+      query: text,
+      response: html,
+      created_at: new Date().toISOString()
+    });
+
+    busy = false; input.focus();
+  }
+
+  send.addEventListener('click', ()=>handleSend(input.value.trim()));
+  input.addEventListener('keydown', e=>{
+    if(e.key==='Enter' && !e.shiftKey){
+      e.preventDefault();
+      handleSend(input.value.trim());
+    }
+  });
+  $$('.topic-btn', box).forEach(b=>{
+    b.addEventListener('click', ()=>handleSend(b.dataset.msg));
+  });
+  clear.addEventListener('click', ()=>{
+    box.innerHTML = `
+      <div class="welcome-msg">
+        <div class="welcome-icon"><i class="fas fa-user-doctor"></i></div>
+        <h3>Chat cleared</h3>
+        <p>Ask a new medical question below.</p>
+      </div>`;
+    toast('Chat cleared','info');
+    input.focus();
+  });
+
+  input.focus();
+}
+
+/* ---------- ADMIN USERS ---------- */
+function setupAdminUsers(){
+  $$('.delete-user-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.dataset.id;
+      const name = btn.dataset.name;
+      if(!confirm(`Delete user "${name}"? This will also delete all their chats.`)) return;
+      const users = DB.users().filter(u=>u.id!==id);
+      DB.saveUsers(users);
+      DB.deleteUserChats(id);
+      toast(`User "${name}" deleted`,'success');
+      render();
+    });
+  });
+}
+
+/* =========================================================
+   8. EVENTS / BOOT
+   ========================================================= */
+document.addEventListener('click', e=>{
+  const link = e.target.closest('a[data-nav], a[href^="#/"]');
+  if(!link) return;
+  setTimeout(render, 0);
+});
+window.addEventListener('hashchange', render);
+
+$('#hamburger').addEventListener('click', ()=>{
+  $('#navMenu').classList.toggle('open');
+});
+
+(function boot(){
+  if(!location.hash) location.hash = '#/';
+  renderNavAuth();
+  applyRoleVisibility();
+  render();
+})();
+</script>
+</body>
+</html>
